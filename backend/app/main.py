@@ -1,7 +1,9 @@
 from datetime import datetime
+from time import sleep
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, status
+from sqlalchemy.exc import OperationalError
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -32,7 +34,14 @@ metrics = {"requests_total": 0, "errors_total": 0}
 
 @app.on_event("startup")
 def create_tables() -> None:
-    Base.metadata.create_all(bind=engine)
+    for attempt in range(1, 11):
+        try:
+            Base.metadata.create_all(bind=engine)
+            return
+        except OperationalError:
+            if attempt == 10:
+                raise
+            sleep(2)
 
 
 @app.middleware("http")
