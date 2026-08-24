@@ -8,3 +8,4 @@ htmlcov/
 *.db
 *.egg-info/
 pytest-cache-files-*/
+server.*.log
